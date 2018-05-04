@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+'use strict';
+
+const { Runner, Environment } = require('../dist/commonjs/src');
+const program = require('commander');
+
+process.chdir('/Users/chietala/Code/dyfactor-app');
+
+let env = new Environment({
+  build: 'ember build',
+  navigation: {
+    options: {},
+    urls: ['http://localhost:1234', 'http://localhost:1234/profile']
+  }
+});
+
+let { types, plugins } = env;
+
+const levelEnum = {
+  analyze: 0,
+  data: 1,
+  safe: 2,
+  havoc: 3
+}
+
+function levelDescription() {
+  return plugins.map(desc => {
+    return `name: ${desc.name} lev: ${desc.modes.join(', ')}`
+  }).join('');
+}
+
+function verifyPluginLevel(plugin, level) {
+  let currentPlugin = plugins.find(p => p.name === plugin);
+
+  if (!currentPlugin) {
+    console.log(`Plugin "${plugin}" was not found`);
+    process.exit(1);
+  }
+
+  if (!currentPlugin.modes.includes(level)) {
+    console.log(`Plugin "${plugin}" only takes ${currentPlugin.modes.join(', ')}. "${level}" was passed.`);
+    process.exit(1);
+  }
+
+  return level;
+}
+
+program
+  .option('-l, --level <name>', `analyze, data, safe, havoc`)
+  .action(async (type, plugin, path, options) => {
+    let level;
+    if (options.level) {
+      level = verifyPluginLevel(plugin, options.level);
+    }
+
+    let runner = new Runner(env);
+
+    console.log(type, plugin,path, level)
+    await runner.run(type, plugin, path, levelEnum[level]);
+  }).parse(process.argv);

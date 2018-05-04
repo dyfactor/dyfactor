@@ -1,0 +1,52 @@
+{
+  "name": "dyfactor",
+  "version": "0.5.0",
+  "description": "A brand new TypeScript library.",
+  "main": "dist/commonjs/src/index.js",
+  "module": "dist/modules/src/index.js",
+  "types": "dist/types/src/index.d.ts",
+  "ember-addon": {
+    "main": "ember-addon.js"
+  },
+  "keywords": [
+    "ember-addon"
+  ],
+  "scripts": {
+    "start": "ember serve",
+    "problems": "node ./scripts/problems.js",
+    "preversion": "npm run test",
+    "prepack": "ember build -prod",
+    "build": "ember build -prod",
+    "build-tests": "ember build",
+    "pretest": "npm run problems",
+    "test": "ember test",
+    "tdd": "ember test --server"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^10.0.1",
+    "@types/puppeteer": "^1.2.3",
+    "@types/qunit": "^2.5.0",
+    "ember-cli": "^3.1.2",
+    "libkit": "^0.5.19",
+    "qunitjs": "^2.4.1",
+    "shelljs": "^0.8.1",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.3"
+  },
+  "dependencies": {
+    "@glimmer/syntax": "^0.34.2",
+    "@types/babel-core": "^6.25.3",
+    "@types/execa": "^0.9.0",
+    "@types/inquirer": "^0.0.41",
+    "@types/ora": "^1.3.4",
+    "babel-core": "^6.26.3",
+    "commander": "^2.15.1",
+    "execa": "^0.10.0",
+    "inquirer": "^5.2.0",
+    "ora": "^2.1.0",
+    "puppeteer": "^1.3.0",
+    "ts-std": "^0.6.2",
+    "walk-sync": "^0.3.2"
+  }
+}
