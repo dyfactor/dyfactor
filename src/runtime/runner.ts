@@ -2,7 +2,7 @@ import { Environment } from './environment';
 import { modeFactory } from './mode';
 
 export class Runner {
-  constructor(private env: Environment) {}
+  constructor(private env: Environment) { }
 
   async run(type: string, name: string, path: string = 'app', level = 3) {
     let { env } = this;

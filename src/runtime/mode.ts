@@ -26,7 +26,7 @@ export function modeFactory(mode: number, env: Environment, plugin: Plugins) {
 }
 
 export interface ModeConstructor<T> {
-  new (env: Environment, plugin: T): BaseMode<T>;
+  new(env: Environment, plugin: T): BaseMode<T>;
 }
 
 export interface Mode {
@@ -37,7 +37,7 @@ export interface Mode {
 }
 
 export class BaseMode<T> implements Mode {
-  constructor(protected env: Environment, protected plugin: T) {}
+  constructor(protected env: Environment, protected plugin: T) { }
   analyze(): void { return; }
   apply(_meta: Meta): void { return; }
   prepare(): Promise<void> {

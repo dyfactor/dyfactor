@@ -3,7 +3,7 @@ import { Environment } from '../runtime/environment';
 
 export interface PluginConstructor<T> {
   capabilities: Capabilities;
-  new (path: string, env: Environment): T;
+  new(path: string, env: Environment): T;
 }
 
 export type Plugins = StaticPlugin | DynamicPlugin;
@@ -55,4 +55,3 @@ export function capabilities(clobber?: Capabilities) {
     runtime: false
   }, clobber);
 }
-

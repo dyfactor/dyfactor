@@ -4,5 +4,10 @@
         "**/.DS_Store": true,
         "tmp": true
     },
+    "[typescript]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
     "typescript.tsdk": "node_modules/typescript/lib"
 }

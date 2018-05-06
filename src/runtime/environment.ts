@@ -49,7 +49,7 @@ function toArgs(args: any) {
       visitor: {
         MustacheStatement(node: any) {
           if (args.includes(node.path.parts.join('.'))) {
-            node.path =  syntax.builders.path(`@${node.path.parts.join('.')}`, node.path.loc);
+            node.path = syntax.builders.path(`@${node.path.parts.join('.')}`, node.path.loc);
           }
         }
       }
@@ -63,8 +63,8 @@ class Disambiguate extends AbstractHybridPlugin {
     return this.inputs.filter(input => {
       let ext = path.extname(input);
       return input.charAt(input.length - 1) !== '/' &&
-             input.includes('components/') &&
-             ext === '.js';
+        input.includes('components/') &&
+        ext === '.js';
     }).forEach(input => {
       let code = fs.readFileSync(input, 'utf8');
       let content = compiler(code, {
