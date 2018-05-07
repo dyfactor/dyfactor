@@ -18,7 +18,11 @@ function instrumentCreate(babel: any) {
         }
 
         if (window.__dyfactor[instance._debugContainerKey]) {
-          window.__dyfactor[instance._debugContainerKey].push(...Object.keys(injections.attrs))
+          Object.keys(injections.attrs).forEach((arg) => {
+            if (!window.__dyfactor[instance._debugContainerKey].contains(arg)) {
+              window.__dyfactor[instance._debugContainerKey].push(arg);
+            }
+          });
         } else {
           window.__dyfactor[instance._debugContainerKey] = Object.keys(injections.attrs);
         }

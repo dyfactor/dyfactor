@@ -4,7 +4,7 @@
 const { Runner, Environment } = require('../dist/commonjs/src');
 const program = require('commander');
 
-process.chdir('/Users/chietala/Code/dyfactor-app');
+process.chdir('/Users/chietala/Code/client');
 
 let env = new Environment({
   build: 'ember build',
