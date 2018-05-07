@@ -10,7 +10,7 @@ let env = new Environment({
   build: 'ember build',
   navigation: {
     options: {},
-    urls: ['http://localhost:1234', 'http://localhost:1234/profile']
+    urls: ['http://localhost:1234']
   }
 });
 

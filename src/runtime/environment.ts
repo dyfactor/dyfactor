@@ -13,8 +13,16 @@ function instrumentCreate(babel: any) {
     IDENT.reopenClass({
       create(injections) {
         let instance = this._super(injections);
-        console.log(JSON.stringify({ [instance._debugContainerKey
-        ]: Object.keys(injections.attrs) }));
+        if (!window.__dyfactor) {
+          window.__dyfactor = {};
+        }
+
+        if (window.__dyfactor[instance._debugContainerKey]) {
+          window.__dyfactor[instance._debugContainerKey].push(...Object.keys(injections.attrs))
+        } else {
+          window.__dyfactor[instance._debugContainerKey] = Object.keys(injections.attrs);
+        }
+
         return instance;
       }
     });

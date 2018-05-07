@@ -92,18 +92,17 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     let page = await browser.newPage();
 
     let meta: Meta = { data: [] };
-    page.on('console', msg => {
-      let json = msg.text();
-      if (!json.includes('DEBUG:')) {
-        meta.data.push(json);
-      }
-    });
 
     let navigationOptions = env.navigation!.options ? env.navigation!.options : {};
 
     for (let url of env.navigation!.urls) {
       spinner.start(`Visiting ${url} ...`);
       await page.goto(url, navigationOptions);
+      await page.waitForSelector('.ember-application');
+      let result = await page.evaluateHandle(() => (window as any).__dyfactor);
+      let data = await result.jsonValue();
+      meta.data.push(data);
+      await result.dispose();
       spinner = spinner.succeed(`Visited ${url}`);
     }
 
