@@ -4,6 +4,7 @@
         "**/.DS_Store": true,
         "tmp": true
     },
+    "editor.formatOnSave": true,
     "[typescript]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": true

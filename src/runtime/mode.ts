@@ -26,7 +26,7 @@ export function modeFactory(mode: number, env: Environment, plugin: Plugins) {
 }
 
 export interface ModeConstructor<T> {
-  new(env: Environment, plugin: T): BaseMode<T>;
+  new (env: Environment, plugin: T): BaseMode<T>;
 }
 
 export interface Mode {
@@ -37,9 +37,13 @@ export interface Mode {
 }
 
 export class BaseMode<T> implements Mode {
-  constructor(protected env: Environment, protected plugin: T) { }
-  analyze(): void { return; }
-  modify(_meta: Meta): void { return; }
+  constructor(protected env: Environment, protected plugin: T) {}
+  analyze(): void {
+    return;
+  }
+  modify(_meta: Meta): void {
+    return;
+  }
   instrument(): Promise<void> {
     return Promise.resolve();
   }
@@ -61,7 +65,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
   private spinner: any;
   async instrument(): Promise<void> {
     let { env } = this;
-    let spinner = this.spinner = ora('Applying instrumentation ...').start();
+    let spinner = (this.spinner = ora('Applying instrumentation ...').start());
 
     this.workingBranch = await env.currentBranch();
 
@@ -80,11 +84,13 @@ export class DataMode extends BaseMode<DynamicPlugin> {
 
     spinner = spinner.succeed('Build complete');
 
-    await prompt([{
-      type: 'confirm',
-      name: 'confirmed',
-      message: 'Please start your dev server. When your server is up please continue.'
-    }]);
+    await prompt([
+      {
+        type: 'confirm',
+        name: 'confirmed',
+        message: 'Please start your dev server. When your server is up please continue.'
+      }
+    ]);
 
     spinner = spinner.succeed(`Server is running`);
 

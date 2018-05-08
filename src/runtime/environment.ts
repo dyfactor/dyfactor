@@ -75,19 +75,21 @@ function toArgs(args: any) {
 class Disambiguate extends AbstractHybridPlugin {
   instrument() {
     let compiler = this.env.getCompiler('js');
-    return this.inputs.filter(input => {
-      let ext = path.extname(input);
-      return input.charAt(input.length - 1) !== '/' &&
-        input.includes('components/') &&
-        ext === '.js';
-    }).forEach(input => {
-      let code = fs.readFileSync(input, 'utf8');
-      let content = compiler(code, {
-        plugins: [instrumentCreate]
-      });
+    return this.inputs
+      .filter(input => {
+        let ext = path.extname(input);
+        return (
+          input.charAt(input.length - 1) !== '/' && input.includes('components/') && ext === '.js'
+        );
+      })
+      .forEach(input => {
+        let code = fs.readFileSync(input, 'utf8');
+        let content = compiler(code, {
+          plugins: [instrumentCreate]
+        });
 
-      fs.writeFileSync(input, content.code);
-    });
+        fs.writeFileSync(input, content.code);
+      });
   }
 
   modify(meta: Meta) {
@@ -167,20 +169,22 @@ export class Environment {
   }
 
   get plugins() {
-    return [...this.types.map(type => {
-      let plugins = this._plugins.get(type)!.keys();
+    return [
+      ...this.types.map(type => {
+        let plugins = this._plugins.get(type)!.keys();
 
-      for (let plugin of plugins) {
-        let { capabilities } = this._plugins.get(type)!.get(plugin)!;
-        if (capabilities.runtime) {
-          return { name: plugin, modes: ['data', 'havoc'] };
-        } else {
-          return { name: plugin, modes: ['analyze'] };
+        for (let plugin of plugins) {
+          let { capabilities } = this._plugins.get(type)!.get(plugin)!;
+          if (capabilities.runtime) {
+            return { name: plugin, modes: ['data', 'havoc'] };
+          } else {
+            return { name: plugin, modes: ['analyze'] };
+          }
         }
-      }
 
-      return null;
-    })];
+        return null;
+      })
+    ];
   }
 
   loadPlugins() {
@@ -206,7 +210,7 @@ export class Environment {
   }
 
   async scratchBranch(name: string) {
-    let scratchName = this._currentScratchBranch = this._scratchBranchName(name);
+    let scratchName = (this._currentScratchBranch = this._scratchBranchName(name));
     return this.git(`checkout -b ${scratchName}`);
   }
 
@@ -247,12 +251,15 @@ export class Environment {
 }
 
 async function exec(cmd: string) {
-  return shell(cmd).then((result: ExecaReturns) => {
-    return result.stdout;
-  }, (r: ExecaReturns) => {
-    // tslint:disable:no-console
-    console.log(r.stdout);
-    console.error(r.stderr);
-    throw new Error(`failed: ${cmd}`);
-  });
+  return shell(cmd).then(
+    (result: ExecaReturns) => {
+      return result.stdout;
+    },
+    (r: ExecaReturns) => {
+      // tslint:disable:no-console
+      console.log(r.stdout);
+      console.error(r.stderr);
+      throw new Error(`failed: ${cmd}`);
+    }
+  );
 }

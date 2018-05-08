@@ -3,7 +3,7 @@ import { Environment } from '../runtime/environment';
 
 export interface PluginConstructor<T> {
   capabilities: Capabilities;
-  new(path: string, env: Environment): T;
+  new (path: string, env: Environment): T;
 }
 
 export type Plugins = StaticPlugin | DynamicPlugin;
@@ -51,7 +51,10 @@ export abstract class AbstractHybridPlugin implements DynamicPlugin {
 }
 
 export function capabilities(clobber?: Capabilities) {
-  return Object.assign({
-    runtime: false
-  }, clobber);
+  return Object.assign(
+    {
+      runtime: false
+    },
+    clobber
+  );
 }
