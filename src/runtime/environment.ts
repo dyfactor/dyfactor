@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { NavigationOptions } from 'puppeteer';
 import { AbstractHybridPlugin, Meta, PluginConstructor, Plugins } from '../plugins/plugin';
+import error from '../util/error';
 
 function instrumentCreate(babel: any) {
   const { types: t } = babel;
@@ -72,7 +73,7 @@ function toArgs(args: any) {
 }
 
 class Disambiguate extends AbstractHybridPlugin {
-  prepare() {
+  instrument() {
     let compiler = this.env.getCompiler('js');
     return this.inputs.filter(input => {
       let ext = path.extname(input);
@@ -89,13 +90,12 @@ class Disambiguate extends AbstractHybridPlugin {
     });
   }
 
-  applyMeta(meta: Meta) {
+  modify(meta: Meta) {
     meta.data.forEach((components: any) => {
       Object.keys(components).forEach((component: string) => {
         let templatePath = this.templateFor(component);
         let template = fs.readFileSync(templatePath!, 'utf8');
 
-        console.log(templatePath, components[component]);
         let ast = preprocess(template, {
           plugins: {
             ast: [toArgs(components[component])]
@@ -123,6 +123,17 @@ export interface Navigation {
 }
 
 export class Environment {
+  static create() {
+    const dyfactorPath = `${process.cwd()}/.dyfactor.json`;
+
+    if (!fs.statSync(dyfactorPath)) {
+      error('.dyfactor.json not found in the root of the project. Please run `dyfactor init`.');
+    }
+
+    let config: Config = JSON.parse(fs.readFileSync(dyfactorPath, 'utf8'));
+    return new this(config);
+  }
+
   navigation?: Navigation;
   private _plugins: Map<string, Map<string, PluginConstructor<Plugins>>> = new Map();
   private buildCmd = 'yarn start';

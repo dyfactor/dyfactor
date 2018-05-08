@@ -31,16 +31,16 @@ export interface ModeConstructor<T> {
 
 export interface Mode {
   analyze(): void;
-  apply(meta: Meta): void;
-  prepare(): Promise<void>;
+  modify(meta: Meta): void;
+  instrument(): Promise<void>;
   run(): Promise<Meta>;
 }
 
 export class BaseMode<T> implements Mode {
   constructor(protected env: Environment, protected plugin: T) { }
   analyze(): void { return; }
-  apply(_meta: Meta): void { return; }
-  prepare(): Promise<void> {
+  modify(_meta: Meta): void { return; }
+  instrument(): Promise<void> {
     return Promise.resolve();
   }
   run(): Promise<Meta> {
@@ -59,7 +59,7 @@ export class AnalyzeMode extends BaseMode<StaticPlugin> {
 export class DataMode extends BaseMode<DynamicPlugin> {
   private workingBranch: string = '';
   private spinner: any;
-  async prepare(): Promise<void> {
+  async instrument(): Promise<void> {
     let { env } = this;
     let spinner = this.spinner = ora('Applying instrumentation ...').start();
 
@@ -67,7 +67,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
 
     await env.scratchBranch('refactor');
 
-    this.plugin.prepare();
+    this.plugin.instrument();
 
     this.spinner = spinner.succeed('Applied instrumentation');
   }
@@ -115,13 +115,13 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     return meta;
   }
 
-  apply(meta: Meta): void {
+  modify(meta: Meta): void {
     fs.writeFileSync('dyfactor-metadata.json', JSON.stringify(meta));
   }
 }
 
 export class HavocMode extends DataMode {
-  apply(meta: Meta): void {
-    this.plugin.applyMeta(meta);
+  modify(meta: Meta): void {
+    this.plugin.modify(meta);
   }
 }

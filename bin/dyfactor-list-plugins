@@ -3,16 +3,7 @@
 
 const { Environment } = require('../dist/commonjs/src');
 
-let env = new Environment({
-  build: 'ember build',
-  navigation: {
-    options: { waitTill: 'networkidle2' },
-    urls: ['http://localhost:1234', 'http://localhost:1234/profile']
-  }
-});
-
-let { plugins } = env;
-
+let { plugins } = Environment.create();
 let message = plugins.map((p) => {
   return `Name: ${p.name} Levels: ${p.modes.join(', ')}`
 }).join('\n');

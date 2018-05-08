@@ -27,8 +27,8 @@ export interface StaticPlugin extends Plugin {
 }
 
 export interface DynamicPlugin extends Plugin {
-  prepare(): void;
-  applyMeta(meta: Meta): void;
+  instrument(): void;
+  modify(meta: Meta): void;
 }
 
 export interface Capabilities {
@@ -46,8 +46,8 @@ export abstract class AbstractHybridPlugin implements DynamicPlugin {
     this.inputs = this.inputs.map(input => `${path}/${input}`);
   }
 
-  abstract prepare(): void;
-  abstract applyMeta(meta: Meta): void;
+  abstract instrument(): void;
+  abstract modify(meta: Meta): void;
 }
 
 export function capabilities(clobber?: Capabilities) {

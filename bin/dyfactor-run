@@ -4,23 +4,14 @@
 const { Runner, Environment } = require('../dist/commonjs/src');
 const program = require('commander');
 
-process.chdir('/Users/chietala/Code/client');
-
-let env = new Environment({
-  build: 'ember build',
-  navigation: {
-    options: {},
-    urls: ['http://localhost:1234']
-  }
-});
-
+let env = Environment.create();
 let { types, plugins } = env;
 
 const levelEnum = {
   analyze: 0,
-  data: 1,
+  'export-data': 1,
   safe: 2,
-  havoc: 3
+  modify: 3
 }
 
 function levelDescription() {
@@ -46,7 +37,7 @@ function verifyPluginLevel(plugin, level) {
 }
 
 program
-  .option('-l, --level <name>', `analyze, data, safe, havoc`)
+  .option('-l, --level <name>', `analyze, export-data, modify`)
   .action(async (type, plugin, path, options) => {
     let level;
     if (options.level) {
@@ -55,6 +46,5 @@ program
 
     let runner = new Runner(env);
 
-    console.log(type, plugin,path, level)
     await runner.run(type, plugin, path, levelEnum[level]);
   }).parse(process.argv);

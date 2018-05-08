@@ -13,9 +13,9 @@ export class Runner {
     let mode = modeFactory(level, env, plugin);
 
     if (capabilities.runtime) {
-      await mode.prepare();
+      await mode.instrument();
       let meta = await mode.run();
-      mode.apply(meta);
+      mode.modify(meta);
     } else {
       mode.analyze();
     }

@@ -4,6 +4,7 @@
 const program = require('commander');
 
 program
+  .command('init', 'Initializes dyfactor in your project')
   .command('run', 'Runs a plugin against code')
   .command('list-plugins', 'Lists the available plugins')
   .parse(process.argv);
