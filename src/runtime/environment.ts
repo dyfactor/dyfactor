@@ -59,10 +59,12 @@ function toArgs(args: any) {
     return {
       name: 'to-@args',
       visitor: {
-        MustacheStatement(node: any) {
-          if (args.includes(node.path.parts.join('.'))) {
-            node.path = syntax.builders.path(`@${node.path.parts.join('.')}`, node.path.loc);
+        PathExpression(node: any) {
+          if (args.includes(node.original)) {
+            return syntax.builders.path(`@${node.original}`, node.loc);
           }
+
+          return node;
         }
       }
     };
@@ -88,17 +90,18 @@ class Disambiguate extends AbstractHybridPlugin {
   }
 
   applyMeta(meta: Meta) {
-    meta.data.forEach((d: string) => {
-      let components = JSON.parse(d);
-      Object.keys(components).forEach(component => {
-        let p = this.templateFor(component);
-        let template = fs.readFileSync(p!, 'utf8');
+    meta.data.forEach((components: any) => {
+      Object.keys(components).forEach((component: string) => {
+        let templatePath = this.templateFor(component);
+        let template = fs.readFileSync(templatePath!, 'utf8');
+
+        console.log(templatePath, components[component]);
         let ast = preprocess(template, {
           plugins: {
             ast: [toArgs(components[component])]
           }
         });
-        fs.writeFileSync(p!, print(ast));
+        fs.writeFileSync(templatePath!, print(ast));
       });
     });
   }
