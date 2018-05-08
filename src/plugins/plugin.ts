@@ -1,16 +1,19 @@
 import * as walkSync from 'walk-sync';
 import { Environment } from '../runtime/environment';
+import { Option } from '../util/core';
 
 export interface PluginConstructor<T> {
   capabilities: Capabilities;
   new (path: string, env: Environment): T;
 }
 
-export type Plugins = StaticPlugin | DynamicPlugin;
+export type PluginType = StaticPlugin | DynamicPlugin;
 
-export interface PluginDescriptor {
+export interface DyfactorConfig {
   name: string;
-  modes: string[];
+  type: string;
+  levels: string[];
+  packageName: Option<string>;
 }
 
 export interface Plugin {

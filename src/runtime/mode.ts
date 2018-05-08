@@ -2,27 +2,43 @@ import * as fs from 'fs';
 import { prompt } from 'inquirer';
 import * as ora from 'ora';
 import { launch } from 'puppeteer';
-import { DynamicPlugin, Meta, Plugins, StaticPlugin } from '../plugins/plugin';
+import { DynamicPlugin, Meta, PluginType, StaticPlugin } from '../plugins/plugin';
+import error from '../util/error';
 import { Environment } from './environment';
 
-export const enum Modes {
+export enum Levels {
   analyze,
-  data,
+  'export-data',
   safe,
-  havoc
+  modify
 }
 
-export function modeFactory(mode: number, env: Environment, plugin: Plugins) {
-  switch (mode) {
-    case Modes.analyze:
-      return new AnalyzeMode(env, plugin as StaticPlugin);
-    case Modes.data:
-      return new DataMode(env, plugin as DynamicPlugin);
-    case Modes.havoc:
-      return new HavocMode(env, plugin as DynamicPlugin);
+function toLevel(level: string) {
+  switch (level) {
+    case 'analyze':
+      return Levels.analyze;
+    case 'export-data':
+      return Levels['export-data'];
+    case 'modify':
+      return Levels.modify;
   }
 
-  throw new Error(`Mode not found`);
+  return error(`Level "${level} is not a supported level.`);
+}
+
+export function modeFactory(level: string, env: Environment, plugin: PluginType) {
+  let convertedLevel = toLevel(level);
+
+  switch (convertedLevel) {
+    case Levels.analyze:
+      return new AnalyzeMode(env, plugin as StaticPlugin);
+    case Levels['export-data']:
+      return new DataMode(env, plugin as DynamicPlugin);
+    case Levels.modify:
+      return new ModifyMode(env, plugin as DynamicPlugin);
+  }
+
+  return null;
 }
 
 export interface ModeConstructor<T> {
@@ -126,7 +142,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
   }
 }
 
-export class HavocMode extends DataMode {
+export class ModifyMode extends DataMode {
   modify(meta: Meta): void {
     this.plugin.modify(meta);
   }

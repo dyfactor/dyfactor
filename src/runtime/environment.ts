@@ -1,118 +1,11 @@
-import { ASTPluginEnvironment, preprocess, print } from '@glimmer/syntax';
 import { transform } from 'babel-core';
 import { ExecaReturns, shell } from 'execa';
 import * as fs from 'fs';
-import * as path from 'path';
 import { NavigationOptions } from 'puppeteer';
-import { AbstractHybridPlugin, Meta, PluginConstructor, Plugins } from '../plugins/plugin';
+import { DyfactorConfig, PluginConstructor, PluginType } from '../plugins/plugin';
+import { Dict } from '../util/core';
 import error from '../util/error';
-
-function instrumentCreate(babel: any) {
-  const { types: t } = babel;
-  let ident: any;
-  let template = babel.template(`
-    IDENT.reopenClass({
-      create(injections) {
-        let instance = this._super(injections);
-        if (!window.__dyfactor) {
-          window.__dyfactor = {};
-        }
-
-        if (window.__dyfactor[instance._debugContainerKey]) {
-          Object.keys(injections.attrs).forEach((arg) => {
-            if (!window.__dyfactor[instance._debugContainerKey].contains(arg)) {
-              window.__dyfactor[instance._debugContainerKey].push(arg);
-            }
-          });
-        } else {
-          window.__dyfactor[instance._debugContainerKey] = Object.keys(injections.attrs);
-        }
-
-        return instance;
-      }
-    });
-  `);
-  return {
-    name: 'instrument-create',
-    visitor: {
-      Program: {
-        enter(p: any) {
-          ident = p.scope.generateUidIdentifier('refactor');
-        },
-        exit(p: any) {
-          let body = p.node.body;
-          let ast = template({ IDENT: ident });
-          body.push(ast, t.exportDefaultDeclaration(ident));
-        }
-      },
-      ExportDefaultDeclaration(p: any) {
-        let declaration = p.node.declaration;
-        let declarator = t.variableDeclarator(ident, declaration);
-        let varDecl = t.variableDeclaration('const', [declarator]);
-        p.replaceWith(varDecl);
-      }
-    }
-  };
-}
-
-function toArgs(args: any) {
-  return ({ syntax }: ASTPluginEnvironment) => {
-    return {
-      name: 'to-@args',
-      visitor: {
-        PathExpression(node: any) {
-          if (args.includes(node.original)) {
-            return syntax.builders.path(`@${node.original}`, node.loc);
-          }
-
-          return node;
-        }
-      }
-    };
-  };
-}
-
-class Disambiguate extends AbstractHybridPlugin {
-  instrument() {
-    let compiler = this.env.getCompiler('js');
-    return this.inputs
-      .filter(input => {
-        let ext = path.extname(input);
-        return (
-          input.charAt(input.length - 1) !== '/' && input.includes('components/') && ext === '.js'
-        );
-      })
-      .forEach(input => {
-        let code = fs.readFileSync(input, 'utf8');
-        let content = compiler(code, {
-          plugins: [instrumentCreate]
-        });
-
-        fs.writeFileSync(input, content.code);
-      });
-  }
-
-  modify(meta: Meta) {
-    meta.data.forEach((components: any) => {
-      Object.keys(components).forEach((component: string) => {
-        let templatePath = this.templateFor(component);
-        let template = fs.readFileSync(templatePath!, 'utf8');
-
-        let ast = preprocess(template, {
-          plugins: {
-            ast: [toArgs(components[component])]
-          }
-        });
-        fs.writeFileSync(templatePath!, print(ast));
-      });
-    });
-  }
-
-  private templateFor(fullName: string) {
-    let [, name] = fullName.split(':');
-    return this.inputs.find(input => input.includes(`templates/components/${name}`));
-  }
-}
+import { Project } from './project';
 
 export interface Config {
   navigation?: Navigation;
@@ -132,17 +25,20 @@ export class Environment {
       error('.dyfactor.json not found in the root of the project. Please run `dyfactor init`.');
     }
 
+    let project = new Project();
+
     let config: Config = JSON.parse(fs.readFileSync(dyfactorPath, 'utf8'));
-    return new this(config);
+    return new this(project, config);
   }
 
   navigation?: Navigation;
-  private _plugins: Map<string, Map<string, PluginConstructor<Plugins>>> = new Map();
   private buildCmd = 'yarn start';
   private guid = 0;
   private _currentScratchBranch = '';
+  private project: Project;
 
-  constructor(config: Config) {
+  constructor(project: Project, config: Config) {
+    this.project = project;
     if (config.navigation) {
       this.navigation = config.navigation;
     }
@@ -150,8 +46,6 @@ export class Environment {
     if (config.build) {
       this.buildCmd = config.build;
     }
-
-    this.loadPlugins();
   }
 
   getCompiler(_name: string) {
@@ -159,54 +53,34 @@ export class Environment {
   }
 
   get types() {
-    let keys = this._plugins.keys();
-    let types: string[] = [];
-    for (let key of keys) {
-      types.push(key);
-    }
-
-    return types;
+    let { project } = this;
+    return Object.keys(project.plugins).map(plugin => {
+      return project.plugins[plugin].type;
+    });
   }
 
-  get plugins() {
-    return [
-      ...this.types.map(type => {
-        let plugins = this._plugins.get(type)!.keys();
-
-        for (let plugin of plugins) {
-          let { capabilities } = this._plugins.get(type)!.get(plugin)!;
-          if (capabilities.runtime) {
-            return { name: plugin, modes: ['data', 'havoc'] };
-          } else {
-            return { name: plugin, modes: ['analyze'] };
-          }
-        }
-
-        return null;
-      })
-    ];
+  get plugins(): Dict<DyfactorConfig> {
+    let { project } = this;
+    return project.plugins;
   }
 
-  loadPlugins() {
-    let templatePlugins: Map<string, PluginConstructor<Plugins>> = new Map();
-    templatePlugins.set('disambiguate', Disambiguate);
-    this._plugins.set('template', templatePlugins);
-  }
+  lookupPlugin(type: string, plugin: string): PluginConstructor<PluginType> {
+    let { project } = this;
+    let types = project.pluginsByType();
 
-  lookupPlugin(type: string, plugin: string) {
-    let types = this._plugins.get(type);
-
-    if (!types) {
-      throw new Error(`No type "${type}" found.`);
+    if (!types[type]) {
+      error(`No type "${type}" found.`);
     }
 
-    let pluginConstructor = types.get(plugin);
+    let selectedPlugin = types[type].find(p => {
+      return p.name === plugin;
+    });
 
-    if (!pluginConstructor) {
-      throw new Error(`No plugin called "${plugin}" was found.`);
+    if (!selectedPlugin) {
+      error(`No plugin called "${plugin}" was found.`);
     }
 
-    return pluginConstructor;
+    return require(selectedPlugin!.packageName!);
   }
 
   async scratchBranch(name: string) {

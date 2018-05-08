@@ -7,17 +7,12 @@ const program = require('commander');
 let env = Environment.create();
 let { types, plugins } = env;
 
-const levelEnum = {
-  analyze: 0,
-  'export-data': 1,
-  safe: 2,
-  modify: 3
-}
-
 function levelDescription() {
-  return plugins.map(desc => {
-    return `name: ${desc.name} lev: ${desc.modes.join(', ')}`
-  }).join('');
+  return plugins
+    .map(desc => {
+      return `name: ${desc.name} lev: ${desc.modes.join(', ')}`;
+    })
+    .join('');
 }
 
 function verifyPluginLevel(plugin, level) {
@@ -29,7 +24,9 @@ function verifyPluginLevel(plugin, level) {
   }
 
   if (!currentPlugin.modes.includes(level)) {
-    console.log(`Plugin "${plugin}" only takes ${currentPlugin.modes.join(', ')}. "${level}" was passed.`);
+    console.log(
+      `Plugin "${plugin}" only takes ${currentPlugin.modes.join(', ')}. "${level}" was passed.`
+    );
     process.exit(1);
   }
 
@@ -46,5 +43,6 @@ program
 
     let runner = new Runner(env);
 
-    await runner.run(type, plugin, path, levelEnum[level]);
-  }).parse(process.argv);
+    await runner.run(type, plugin, path, level);
+  })
+  .parse(process.argv);

@@ -4,10 +4,15 @@
 const { Environment } = require('../dist/commonjs/src');
 
 let { plugins } = Environment.create();
-let message = plugins.map((p) => {
-  return `Name: ${p.name} Levels: ${p.modes.join(', ')}`
-}).join('\n');
+let message = Object.keys(plugins)
+  .map(pluginName => {
+    let config = plugins[pluginName];
+    let levels = config.levels;
+    let type = config.type;
+    return `Name: ${pluginName} Type: ${type} Levels: ${levels.join(', ')}`;
+  })
+  .join('\n');
 
-message = `\nPlugins\n========\n${message}`;
+message = `\nPlugins\n=============\n${message}`;
 
 console.log(`${message}`);
