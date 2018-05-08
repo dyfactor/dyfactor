@@ -1,7 +1,6 @@
 import chalk from 'chalk';
+import * as SilentError from 'silent-error';
 
 export default function error(msg: string) {
-  // tslint:disable:no-console
-  console.log(`${chalk.redBright('Error:')} ${msg}`);
-  process.exit(1);
+  throw new SilentError(`${chalk.redBright('Error:')} ${msg}`);
 }

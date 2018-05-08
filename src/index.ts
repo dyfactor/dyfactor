@@ -1,3 +1,5 @@
 export { Environment } from './runtime/environment';
+export { ProjectImpl, Project } from './runtime/project';
 export { Runner } from './runtime/runner';
-export { Levels } from './runtime/mode';
+export * from './runtime/mode';
+export * from './plugins/plugin';

@@ -1,34 +1,13 @@
-import { transform } from 'babel-core';
 import { ExecaReturns, shell } from 'execa';
-import * as fs from 'fs';
-import { NavigationOptions } from 'puppeteer';
 import { DyfactorConfig, PluginConstructor, PluginType } from '../plugins/plugin';
 import { Dict } from '../util/core';
 import error from '../util/error';
-import { Project } from './project';
-
-export interface Config {
-  navigation?: Navigation;
-  build?: string;
-}
-
-export interface Navigation {
-  urls: string[];
-  options?: NavigationOptions;
-}
+import { Navigation, Project, ProjectImpl } from './project';
 
 export class Environment {
   static create() {
-    const dyfactorPath = `${process.cwd()}/.dyfactor.json`;
-
-    if (!fs.statSync(dyfactorPath)) {
-      error('.dyfactor.json not found in the root of the project. Please run `dyfactor init`.');
-    }
-
-    let project = new Project();
-
-    let config: Config = JSON.parse(fs.readFileSync(dyfactorPath, 'utf8'));
-    return new this(project, config);
+    let project = new ProjectImpl();
+    return new this(project);
   }
 
   navigation?: Navigation;
@@ -37,8 +16,9 @@ export class Environment {
   private _currentScratchBranch = '';
   private project: Project;
 
-  constructor(project: Project, config: Config) {
+  constructor(project: Project) {
     this.project = project;
+    let { config } = project;
     if (config.navigation) {
       this.navigation = config.navigation;
     }
@@ -46,10 +26,6 @@ export class Environment {
     if (config.build) {
       this.buildCmd = config.build;
     }
-  }
-
-  getCompiler(_name: string) {
-    return transform;
   }
 
   get types() {

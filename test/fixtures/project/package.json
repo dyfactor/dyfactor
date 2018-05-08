@@ -1,0 +1,11 @@
+{
+  "name": "project",
+  "version": "0.0.0",
+  "dependencies": {
+    "not-a-plugin": "*"
+  },
+  "devDependencies": {
+    "plugin-a": "*",
+    "plugin-b": "*"
+  }
+}

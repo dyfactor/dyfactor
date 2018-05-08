@@ -19,7 +19,7 @@
     "build": "ember build -prod",
     "build-tests": "ember build",
     "pretest": "npm run problems",
-    "test": "ember test",
+    "test": "ember build && testem ci",
     "tdd": "ember test --server"
   },
   "license": "MIT",
@@ -50,6 +50,7 @@
     "inquirer": "^5.2.0",
     "ora": "^2.1.0",
     "puppeteer": "^1.3.0",
+    "silent-error": "^1.1.0",
     "ts-std": "^0.6.2",
     "walk-sync": "^0.3.2"
   }
