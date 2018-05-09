@@ -3,7 +3,7 @@ import { prompt } from 'inquirer';
 import * as ora from 'ora';
 import { launch } from 'puppeteer';
 import { DynamicPlugin, Meta, PluginType, StaticPlugin } from '../plugins/plugin';
-import error from '../util/error';
+import error, { to } from '../util/error';
 import { Environment } from './environment';
 
 export enum Levels {
@@ -83,9 +83,11 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     let { env } = this;
     let spinner = (this.spinner = ora('Applying instrumentation ...').start());
 
-    this.workingBranch = await env.currentBranch();
+    let branch = await to(env.currentBranch());
 
-    await env.scratchBranch('refactor');
+    this.workingBranch = branch;
+
+    await to(env.scratchBranch('refactor'));
 
     this.plugin.instrument();
 
@@ -96,7 +98,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     let { spinner, env } = this;
     spinner.start('Starting build ...');
 
-    await env.build();
+    await to(env.build());
 
     spinner = spinner.succeed('Build complete');
 
@@ -130,9 +132,9 @@ export class DataMode extends BaseMode<DynamicPlugin> {
 
     await browser.close();
 
-    await env.commit();
-    await env.checkoutBranch(this.workingBranch);
-    await env.deleteScratchBranch();
+    await to(env.commit());
+    await to(env.checkoutBranch(this.workingBranch));
+    await to(env.deleteScratchBranch());
 
     return meta;
   }
