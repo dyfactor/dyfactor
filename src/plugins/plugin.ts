@@ -46,7 +46,7 @@ export class BasePlugin implements Plugin {
   }
 }
 
-export abstract class AbstractHybridPlugin extends BasePlugin implements DynamicPlugin {
+export abstract class AbstractDynamicPlugin extends BasePlugin implements DynamicPlugin {
   static capabilities = capabilities({ runtime: true });
   abstract instrument(): void;
   abstract modify(telemetry: Telemetry): void;
