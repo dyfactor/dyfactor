@@ -21,17 +21,17 @@ export interface Plugin {
   env: Environment;
 }
 
-export interface Meta {
+export interface Telemetry {
   data: any;
 }
 
 export interface StaticPlugin extends Plugin {
-  analyze(): void;
+  modify(): void;
 }
 
 export interface DynamicPlugin extends Plugin {
   instrument(): void;
-  modify(meta: Meta): void;
+  modify(telemetry: Telemetry): void;
 }
 
 export interface Capabilities {
@@ -52,12 +52,12 @@ export class BasePlugin implements Plugin {
 export abstract class AbstractHybridPlugin extends BasePlugin implements DynamicPlugin {
   static capabilities = capabilities({ runtime: true });
   abstract instrument(): void;
-  abstract modify(meta: Meta): void;
+  abstract modify(telemetry: Telemetry): void;
 }
 
 export abstract class AbstractStaticPlugin extends BasePlugin implements StaticPlugin {
   static capabilities = capabilities();
-  abstract analyze(): void;
+  abstract modify(): void;
 }
 
 export function capabilities(clobber?: Capabilities) {

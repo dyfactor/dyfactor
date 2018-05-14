@@ -74,7 +74,7 @@ interface StaticPlugin {
   /**
    * Hook called by the runner where codemod is implimented
    */
-  analyze(): void;
+  modify(): void;
 }
 ```
 
@@ -90,7 +90,7 @@ function filesOnly(path) {
 }
 
 export default class extends StaticPlugin {
-  analyze() {
+  modify() {
     this.inputs.filter(filesOnly).forEach(input => {
       let content = fs.readFileSync(input, 'utf8');
       let ast = recast.parse(content);

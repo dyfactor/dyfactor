@@ -1,4 +1,4 @@
-import { AbstractHybridPlugin, Meta, Project } from 'dyfactor';
+import { AbstractHybridPlugin, Project, Telemetry } from 'dyfactor';
 
 export class MockProject implements Project {
   config = {};
@@ -10,5 +10,5 @@ export class MockProject implements Project {
 
 export class MockPlugin extends AbstractHybridPlugin {
   instrument(): void {}
-  modify(_meta: Meta): void {}
+  modify(_telemetry: Telemetry): void {}
 }

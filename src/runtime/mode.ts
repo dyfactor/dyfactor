@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { prompt } from 'inquirer';
 import * as ora from 'ora';
 import { launch } from 'puppeteer';
-import { DynamicPlugin, Meta, PluginType, StaticPlugin } from '../plugins/plugin';
+import { DynamicPlugin, PluginType, StaticPlugin, Telemetry } from '../plugins/plugin';
 import error, { to } from '../util/error';
 import { Environment } from './environment';
 
@@ -47,9 +47,9 @@ export interface ModeConstructor<T> {
 
 export interface Mode {
   analyze(): void;
-  modify(meta: Meta): void;
+  modify(telemetry: Telemetry): void;
   instrument(): Promise<void>;
-  run(): Promise<Meta>;
+  run(): Promise<Telemetry>;
 }
 
 export class BaseMode<T> implements Mode {
@@ -57,13 +57,13 @@ export class BaseMode<T> implements Mode {
   analyze(): void {
     return;
   }
-  modify(_meta: Meta): void {
+  modify(_telemetry: Telemetry): void {
     return;
   }
   instrument(): Promise<void> {
     return Promise.resolve();
   }
-  run(): Promise<Meta> {
+  run(): Promise<Telemetry> {
     return Promise.resolve({ data: [] });
   }
 }
@@ -71,7 +71,7 @@ export class BaseMode<T> implements Mode {
 export class AnalyzeMode extends BaseMode<StaticPlugin> {
   analyze(): void {
     let spinner = ora('Appling CodeMods ...').start();
-    this.plugin.analyze();
+    this.plugin.modify();
     spinner.succeed('Applied CodeMods');
   }
 }
@@ -94,7 +94,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     this.spinner = spinner.succeed('Applied instrumentation');
   }
 
-  async run(): Promise<Meta> {
+  async run(): Promise<Telemetry> {
     let { spinner, env } = this;
     spinner.start('Starting build ...');
 
@@ -115,7 +115,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     let browser = await launch({ headless: false, slowMo: 250 });
     let page = await browser.newPage();
 
-    let meta: Meta = { data: [] };
+    let telemetry: Telemetry = { data: [] };
 
     let navigationOptions = env.navigation!.options ? env.navigation!.options : {};
 
@@ -125,7 +125,7 @@ export class DataMode extends BaseMode<DynamicPlugin> {
       await page.waitFor(2000);
       let result = await page.evaluateHandle(() => (window as any).__dyfactor);
       let data = await result.jsonValue();
-      meta.data.push(data);
+      telemetry.data.push(data);
       await result.dispose();
       spinner = spinner.succeed(`Visited ${url}`);
     }
@@ -136,16 +136,16 @@ export class DataMode extends BaseMode<DynamicPlugin> {
     await to(env.checkoutBranch(this.workingBranch));
     await to(env.deleteScratchBranch());
 
-    return meta;
+    return telemetry;
   }
 
-  modify(meta: Meta): void {
-    fs.writeFileSync('dyfactor-metadata.json', JSON.stringify(meta));
+  modify(telemetry: Telemetry): void {
+    fs.writeFileSync('dyfactor-telemetry.json', JSON.stringify(telemetry));
   }
 }
 
 export class ModifyMode extends DataMode {
-  modify(meta: Meta): void {
-    this.plugin.modify(meta);
+  modify(telemetry: Telemetry): void {
+    this.plugin.modify(telemetry);
   }
 }

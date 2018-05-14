@@ -13,8 +13,8 @@ export class Runner {
 
     if (capabilities.runtime) {
       await mode.instrument();
-      let meta = await mode.run();
-      mode.modify(meta);
+      let telemetry = await mode.run();
+      mode.modify(telemetry);
     } else {
       mode.analyze();
     }
