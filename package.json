@@ -8,18 +8,16 @@
   "ember-addon": {
     "main": "ember-addon.js"
   },
-  "keywords": [
-    "ember-addon"
-  ],
+  "keywords": ["ember-addon"],
   "scripts": {
     "start": "ember serve",
     "problems": "node ./scripts/problems.js",
-    "preversion": "npm run test",
+    "preversion": "yarn run test",
     "prepack": "ember build -prod",
     "build": "ember build -prod",
     "build-tests": "ember build",
-    "pretest": "npm run problems",
-    "test": "ember build && testem ci",
+    "pretest": "yarn run problems; yarn ember build",
+    "test": "yarn qunit dist/commonjs/test/**/*-test.js",
     "tdd": "ember test --server"
   },
   "license": "MIT",
