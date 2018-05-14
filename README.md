@@ -2,6 +2,8 @@
 
 Dyfactor is platform for extracting runtime information from applications to inform codemods. By combining runtime information and static analysis, applications are able migrate codebases to new APIs at a much quicker pace.
 
+[![Dyfactor Video](https://img.youtube.com/vi/_aepVXHceKw/0.jpg)](https://www.youtube.com/watch?v=_aepVXHceKw)]
+
 # Install
 
 ```bash
@@ -52,7 +54,7 @@ While this template is declaritive its not obvious if any of the `MustacheExpres
 
 The Ember Core has recognized that is extremely problematic as an application grows, so they have allowed arguments to be pre-fixed with `@` and locals to be prefixed with `this.`. The issue is that migrated all the templates in a project would take too long because it requires developers to go seperate these things out.
 
-This is where Dyfactor comes in. By writing a [Dynamic Plugin]() we can instrument the application in such a way that allows us to know how this symbols are being resolved at runtime. From there we can use that information to go manually migrate the code or let Dyfactor attempt to do the migration for us.
+This is where Dyfactor comes in. By writing a [Dynamic Plugin](#dynamic-plugins) we can instrument the application in such a way that allows us to know how this symbols are being resolved at runtime. From there we can use that information to go manually migrate the code or let Dyfactor attempt to do the migration for us.
 
 # How Does It Work?
 
