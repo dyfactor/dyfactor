@@ -148,7 +148,7 @@ interface Telemetry {
 ### Example
 
 ```js
-import { DynamicPlugin } from 'dyfactor';
+import { DynamicPlugin, TelemetryBuilder } from 'dyfactor';
 import * as fs from 'fs';
 import { preprocess, print } from '@glimmer/syntax';
 import { transform } from 'babel-core';
@@ -160,22 +160,25 @@ function filesOnly(path) {
 function instrumentCreate(babel) {
   const { types: t } = babel;
   let ident;
+  let t = new TelemetryBuilder();
   let template = babel.template(`
     IDENT.reopenClass({
       create(injections) {
         let instance = this._super(injections);
-        if (!window.__dyfactor) {
-          window.__dyfactor = {};
-        }
-        if (window.__dyfactor[instance._debugContainerKey]) {
-          Object.keys(injections.attrs).forEach((arg) => {
-            if (!window.__dyfactor[instance._debugContainerKey].contains(arg)) {
-              window.__dyfactor[instance._debugContainerKey].push(arg);
+        ${t.preamble()}
+        ${t.conditionallyAdd(
+          'instance._debugContainerKey',
+          () => {
+            return `Object.keys(injections.attrs).forEach((arg) => {
+            if (!${t.path('instance._debugContainerKey')}.contains(arg)) {
+              ${t.path('instance._debugContainerKey')}.push(arg);
             }
-          });
-        } else {
-          window.__dyfactor[instance._debugContainerKey] = Object.keys(injections.attrs);
-        }
+          });`;
+          },
+          () => {
+            return `${t.path('instance._debugContainerKey')} = Object.keys(injections.attrs);`;
+          }
+        )}
         return instance;
       }
     });

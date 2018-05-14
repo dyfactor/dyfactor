@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import { prompt } from 'inquirer';
 import * as ora from 'ora';
 import { launch } from 'puppeteer';
-import { DynamicPlugin, PluginType, StaticPlugin, Telemetry } from '../plugins/plugin';
+import { DynamicPlugin, PluginType, StaticPlugin } from '../plugins/plugin';
+import { Telemetry } from '../plugins/telemetry';
 import error, { to } from '../util/error';
 import { Environment } from './environment';
 

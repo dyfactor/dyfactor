@@ -1,6 +1,7 @@
 import * as walkSync from 'walk-sync';
 import { Environment } from '../runtime/environment';
 import { Option } from '../util/core';
+import { Telemetry } from './telemetry';
 
 export interface PluginConstructor<T> {
   capabilities: Capabilities;
@@ -19,10 +20,6 @@ export interface DyfactorConfig {
 export interface Plugin {
   inputs: string[];
   env: Environment;
-}
-
-export interface Telemetry {
-  data: any;
 }
 
 export interface StaticPlugin extends Plugin {
