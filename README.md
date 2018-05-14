@@ -5,7 +5,7 @@ Dyfactor is platform for extracting runtime information from applications to inf
 **See Dyfactor In Action**
 
 <div style="text-align:center">
-[![Dyfactor Video](https://img.youtube.com/vi/_aepVXHceKw/0.jpg)](https://www.youtube.com/watch?v=_aepVXHceKw)]
+  <a href="https://www.youtube.com/watch?v=_aepVXHceKw"><img alt="Dyfactor Video" src="https://img.youtube.com/vi/_aepVXHceKw/0.jpg" /></a>
 </div>
 
 # Install
