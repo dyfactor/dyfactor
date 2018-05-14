@@ -38,8 +38,7 @@ export interface Capabilities {
   runtime: boolean;
 }
 
-export abstract class AbstractHybridPlugin implements DynamicPlugin {
-  static capabilities = capabilities({ runtime: true });
+export class BasePlugin implements Plugin {
   inputs: string[];
   env: Environment;
 
@@ -48,9 +47,17 @@ export abstract class AbstractHybridPlugin implements DynamicPlugin {
     this.inputs = walkSync(path) as string[];
     this.inputs = this.inputs.map(input => `${path}/${input}`);
   }
+}
 
+export abstract class AbstractHybridPlugin extends BasePlugin implements DynamicPlugin {
+  static capabilities = capabilities({ runtime: true });
   abstract instrument(): void;
   abstract modify(meta: Meta): void;
+}
+
+export abstract class AbstractStaticPlugin extends BasePlugin implements StaticPlugin {
+  static capabilities = capabilities();
+  abstract analyze(): void;
 }
 
 export function capabilities(clobber?: Capabilities) {

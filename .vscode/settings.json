@@ -1,14 +1,14 @@
 {
-    "files.exclude": {
-        "**/.git": true,
-        "**/.DS_Store": true,
-        "tmp": true
-    },
-    "editor.formatOnSave": true,
-    "[typescript]": {
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": true
-        }
-    },
-    "typescript.tsdk": "node_modules/typescript/lib"
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "tmp": true
+  },
+  "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
