@@ -2,7 +2,11 @@
 
 Dyfactor is platform for extracting runtime information from applications to inform codemods. By combining runtime information and static analysis, applications are able migrate codebases to new APIs at a much quicker pace.
 
+**See Dyfactor In Action**
+
+<div style="text-align:center">
 [![Dyfactor Video](https://img.youtube.com/vi/_aepVXHceKw/0.jpg)](https://www.youtube.com/watch?v=_aepVXHceKw)]
+</div>
 
 # Install
 
