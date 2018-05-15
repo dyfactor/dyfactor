@@ -34,7 +34,7 @@ function verifyPluginLevel(plugin, level) {
 }
 
 program
-  .option('-l, --level <name>', `analyze, export-data, modify`)
+  .option('-l, --level <level>', `analyze, export-data, modify`)
   .action(async (type, plugin, path, options) => {
     let level;
     if (options.level) {
