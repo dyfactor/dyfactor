@@ -8,7 +8,7 @@
   "ember-addon": {
     "main": "ember-addon.js"
   },
-  "keywords": ["ember-addon"],
+  "bin": "./bin/dyfactor",
   "scripts": {
     "start": "ember serve",
     "problems": "node ./scripts/problems.js",
