@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+'use strict';
+
+const fs = require('fs');
+const program = require('commander');
+const find = require('find-up');
+const chalk = require('Chalk');
+
+program
+  .action((pluginType, sourceType, name) => {
+    if (pluginType !== 'static' && pluginType !== 'dynamic') {
+      throw new Error(`<pluginType> can only be "static" or "dynamic" got "${pluginType}".`);
+    }
+
+    if (!type) {
+      throw new Error('Must pass a type as the first argument');
+    }
+
+    if (!name) {
+      throw new Error('Must pass a name as the second argument');
+    }
+
+    createProject(pluginType, sourceType, name);
+  })
+  .parse(process.argv);
+
+function createProject(pluginType, type, name) {
+  let indexPath = find.sync(`blueprints/${pluginType}/index.js.template`, {
+    cwd: __dirname
+  });
+  let pkgPath = find.sync(`blueprints/${pluginType}/package.json.template`, {
+    cwd: __dirname
+  });
+  let index = fs.readFileSync(indexPath, 'utf8');
+  let pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  let dir = `dyfactor-plugin-${name}`;
+  fs.mkdirSync(dir);
+  pkg.name = dir;
+  pkg.dyfactor.type = type;
+  pkg.dyfactor.name = name;
+  fs.writeFileSync(`./${dir}/index.js`, index);
+  fs.writeFileSync(`./${dir}/package.json`, JSON.stringify(pkg, null, 2));
+  console.log(`${chalk.green('Success:')} Created the "${name}" plugin at "./${dir}"`);
+}

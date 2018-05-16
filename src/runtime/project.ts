@@ -1,16 +1,20 @@
 import * as fs from 'fs';
 import { NavigationOptions } from 'puppeteer';
+import * as SilentError from 'silent-error';
 import { DyfactorConfig } from '../plugins/plugin';
-import error from '../util/error';
 
 export interface Navigation {
-  urls: string[];
+  pages: Page[];
   options?: NavigationOptions;
 }
 
+export interface Page {
+  url: string;
+  waitFor?: number | string;
+}
+
 export interface Config {
-  navigation?: Navigation;
-  build?: string;
+  navigation: Navigation;
 }
 
 export interface PackageJSON {
@@ -46,8 +50,10 @@ export class ProjectImpl implements Project {
   constructor() {
     const dyfactorPath = `${process.cwd()}/.dyfactor.json`;
 
-    if (!fs.statSync(dyfactorPath)) {
-      error('.dyfactor.json not found in the root of the project. Please run `dyfactor init`.');
+    if (!fs.existsSync(dyfactorPath)) {
+      throw new SilentError(
+        '.dyfactor.json not found in the root of the project. Please run `dyfactor init`.'
+      );
     }
 
     this.config = JSON.parse(fs.readFileSync(dyfactorPath, 'utf8'));

@@ -24,13 +24,13 @@ QUnit.test('aggregates plugins by name', assert => {
       packageName: 'plugin-a',
       name: 'a',
       type: 'javascript',
-      levels: ['export-data', 'modify']
+      levels: ['extract', 'modify']
     },
     b: {
       packageName: 'plugin-b',
       name: 'b',
       type: 'template',
-      levels: ['analyze']
+      levels: ['modify']
     }
   });
 });
@@ -43,7 +43,7 @@ QUnit.test('aggregates plugins by types', assert => {
         packageName: 'plugin-a',
         name: 'a',
         type: 'javascript',
-        levels: ['export-data', 'modify']
+        levels: ['extract', 'modify']
       }
     ],
     template: [
@@ -51,7 +51,7 @@ QUnit.test('aggregates plugins by types', assert => {
         packageName: 'plugin-b',
         name: 'b',
         type: 'template',
-        levels: ['analyze']
+        levels: ['modify']
       }
     ]
   });

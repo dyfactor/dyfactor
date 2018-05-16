@@ -1,7 +1,7 @@
 import { AbstractDynamicPlugin, Project, Telemetry } from 'dyfactor';
 
 export class MockProject implements Project {
-  config = {};
+  config = { navigation: { pages: [] } };
   plugins = {};
   pluginsByType() {
     return {};

@@ -5,6 +5,7 @@ const program = require('commander');
 
 program
   .command('init', 'Initializes dyfactor in your project')
-  .command('run <type> <plugin> <path>', 'Runs a plugin against code')
+  .command('run <sourceType> <plugin> <path>', 'Runs a plugin against code')
+  .command('create-plugin <pluginType> <sourceType> <name>', 'Scaffolds out a plugin project')
   .command('list-plugins', 'Lists the available plugins')
   .parse(process.argv);

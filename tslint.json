@@ -47,8 +47,7 @@
       "check-rest-spread",
       "check-separator",
       "check-type",
-      "check-type-operator",
-      "check-typecast"
+      "check-type-operator"
     ]
   }
 }
