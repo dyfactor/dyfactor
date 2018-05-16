@@ -1,8 +1,18 @@
+import chalk from 'chalk';
 import { ExecaReturns, shell } from 'execa';
+import * as resolve from 'resolve';
+import * as SilentError from 'silent-error';
 import { DyfactorConfig, PluginConstructor, PluginType } from '../plugins/plugin';
 import { Dict } from '../util/core';
 import error from '../util/error';
-import { Navigation, Project, ProjectImpl } from './project';
+import { Navigation, Page, Project, ProjectImpl } from './project';
+
+function normalizePages(page: string | Page): Page {
+  if (typeof page === 'string') {
+    return { url: page };
+  }
+  return page;
+}
 
 export class Environment {
   static create() {
@@ -10,8 +20,7 @@ export class Environment {
     return new this(project);
   }
 
-  navigation?: Navigation;
-  private buildCmd = 'yarn start';
+  navigation: Navigation;
   private guid = 0;
   private _currentScratchBranch = '';
   private project: Project;
@@ -19,13 +28,8 @@ export class Environment {
   constructor(project: Project) {
     this.project = project;
     let { config } = project;
-    if (config.navigation) {
-      this.navigation = config.navigation;
-    }
-
-    if (config.build) {
-      this.buildCmd = config.build;
-    }
+    let normalized = config.navigation.pages.map(normalizePages);
+    this.navigation = Object.assign({}, config.navigation, { pages: normalized });
   }
 
   get types() {
@@ -56,12 +60,23 @@ export class Environment {
       error(`No plugin called "${plugin}" was found.`);
     }
 
-    return require(selectedPlugin!.packageName!);
+    let resolved = resolve.sync(selectedPlugin!.packageName!, {
+      basedir: process.cwd()
+    });
+
+    return require(resolved).default;
   }
 
-  async scratchBranch(name: string) {
+  async scratchBranch(name: string): Promise<string> {
     let scratchName = (this._currentScratchBranch = this._scratchBranchName(name));
-    return this.git(`checkout -b ${scratchName}`);
+    let branch;
+    try {
+      branch = this.git(`checkout -b ${scratchName}`);
+    } catch (e) {
+      console.warn('retrying branch');
+      return this.scratchBranch(name);
+    }
+    return branch;
   }
 
   get scratchBranchName() {
@@ -87,10 +102,6 @@ export class Environment {
     return branch.slice(2, branch.length);
   }
 
-  async build() {
-    return exec(this.buildCmd);
-  }
-
   private _scratchBranchName(name: string) {
     return `scratch-${name}-${this.guid++}`;
   }
@@ -106,10 +117,11 @@ async function exec(cmd: string) {
       return result.stdout;
     },
     (r: ExecaReturns) => {
-      // tslint:disable:no-console
-      console.log(r.stdout);
-      console.error(r.stderr);
-      throw new Error(`failed: ${cmd}`);
+      let err = new Error(r.stderr);
+      if (err.stack) {
+        err.stack = err.stack!.replace('Error:', chalk.red('Error:'));
+      }
+      throw new SilentError(err);
     }
   );
 }

@@ -13,7 +13,7 @@ Dyfactor is platform for extracting runtime information from applications to inf
 # Install
 
 ```bash
-$ yarn install dyfactor --dev
+$ yarn global add dyfactor
 ```
 
 # Usage

@@ -1,0 +1,6 @@
+import { AbstractDynamicPlugin } from 'dyfactor';
+
+export default class extends AbstractDynamicPlugin {
+  instrument() {}
+  modify(telementry) {}
+}

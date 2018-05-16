@@ -1,117 +1,110 @@
+import chalk from 'chalk';
 import * as fs from 'fs';
 import { prompt } from 'inquirer';
 import * as ora from 'ora';
 import { launch } from 'puppeteer';
-import { DynamicPlugin, PluginType, StaticPlugin } from '../plugins/plugin';
+import {
+  AbstractDynamicPlugin,
+  AbstractStaticPlugin,
+  Capabilities,
+  DynamicPlugin,
+  PluginType,
+  StaticPlugin
+} from '../plugins/plugin';
 import { Telemetry } from '../plugins/telemetry';
-import error, { to } from '../util/error';
+import error from '../util/error';
 import { Environment } from './environment';
 
 export enum Levels {
-  analyze,
-  'export-data',
-  safe,
-  modify
+  modify,
+  extract,
+  wizard
 }
 
 function toLevel(level: string) {
   switch (level) {
-    case 'analyze':
-      return Levels.analyze;
-    case 'export-data':
-      return Levels['export-data'];
+    case 'extract':
+      return Levels.extract;
     case 'modify':
       return Levels.modify;
+    case 'wizard':
+      return Levels.wizard;
   }
 
   return error(`Level "${level} is not a supported level.`);
 }
 
-export function modeFactory(level: string, env: Environment, plugin: PluginType) {
+export function modeFactory(
+  capabilities: Capabilities,
+  level: string,
+  env: Environment,
+  plugin: PluginType
+): StaticMode | DynamicMode {
+  if (!capabilities.runtime) {
+    return new StaticModeImpl(env, plugin as StaticPlugin);
+  }
+
   let convertedLevel = toLevel(level);
 
   switch (convertedLevel) {
-    case Levels.analyze:
-      return new AnalyzeMode(env, plugin as StaticPlugin);
-    case Levels['export-data']:
-      return new DataMode(env, plugin as DynamicPlugin);
+    case Levels.extract:
+      return new ExtractModeImpl(env, plugin as DynamicPlugin);
     case Levels.modify:
-      return new ModifyMode(env, plugin as DynamicPlugin);
+      return new ModifyModeImpl(env, plugin as DynamicPlugin);
   }
 
-  return null;
+  throw Error('Could not resolve mode');
 }
 
-export interface ModeConstructor<T> {
-  new (env: Environment, plugin: T): BaseMode<T>;
+export interface StaticMode {
+  modify(): void;
 }
 
-export interface Mode {
-  analyze(): void;
-  modify(telemetry: Telemetry): void;
+export interface DynamicMode {
   instrument(): Promise<void>;
   run(): Promise<Telemetry>;
+  modify(telemetry: Telemetry): void;
 }
 
-export class BaseMode<T> implements Mode {
-  constructor(protected env: Environment, protected plugin: T) {}
-  analyze(): void {
-    return;
-  }
-  modify(_telemetry: Telemetry): void {
-    return;
-  }
-  instrument(): Promise<void> {
-    return Promise.resolve();
-  }
-  run(): Promise<Telemetry> {
-    return Promise.resolve({ data: [] });
-  }
-}
-
-export class AnalyzeMode extends BaseMode<StaticPlugin> {
-  analyze(): void {
-    let spinner = ora('Appling CodeMods ...').start();
+export class StaticModeImpl implements StaticMode {
+  constructor(protected env: Environment, protected plugin: AbstractStaticPlugin) {}
+  modify(): void {
+    let spinner = ora('Applying CodeMod ...').start();
     this.plugin.modify();
-    spinner.succeed('Applied CodeMods');
+    spinner.succeed('Applied CodeMod');
   }
 }
 
-export class DataMode extends BaseMode<DynamicPlugin> {
+export class ExtractModeImpl implements DynamicMode {
+  constructor(protected env: Environment, protected plugin: AbstractDynamicPlugin) {}
   private workingBranch: string = '';
   private spinner: any;
   async instrument(): Promise<void> {
+    await prompt([
+      {
+        type: 'continue',
+        name: 'server',
+        message: 'Start your dev server and press enter to continue ...',
+        default: 'Continue'
+      }
+    ]);
+
     let { env } = this;
     let spinner = (this.spinner = ora('Applying instrumentation ...').start());
 
-    let branch = await to(env.currentBranch());
+    let branch = await env.currentBranch();
 
     this.workingBranch = branch;
 
-    await to(env.scratchBranch('refactor'));
+    await env.scratchBranch('refactor');
 
     this.plugin.instrument();
 
-    this.spinner = spinner.succeed('Applied instrumentation');
+    this.spinner = spinner.succeed(dim('Applied instrumentation'));
   }
 
   async run(): Promise<Telemetry> {
     let { spinner, env } = this;
-    spinner.start('Starting build ...');
-
-    await to(env.build());
-
-    spinner = spinner.succeed('Build complete');
-
-    await prompt([
-      {
-        type: 'confirm',
-        name: 'confirmed',
-        message: 'Please start your dev server. When your server is up please continue.'
-      }
-    ]);
-
-    spinner = spinner.succeed(`Server is running`);
 
     let browser = await launch({ headless: false, slowMo: 250 });
     let page = await browser.newPage();
@@ -120,22 +113,25 @@ export class DataMode extends BaseMode<DynamicPlugin> {
 
     let navigationOptions = env.navigation!.options ? env.navigation!.options : {};
 
-    for (let url of env.navigation!.urls) {
+    for (let currentPage of env.navigation!.pages) {
+      let { url, waitFor } = currentPage;
       spinner.start(`Visiting ${url} ...`);
+
       await page.goto(url, navigationOptions);
-      await page.waitFor(2000);
-      let result = await page.evaluateHandle(() => (window as any).__dyfactor);
+      await page.waitFor(waitFor || 2000);
+      let result = await page.evaluateHandle(() => (window as any).__dyfactor_telemetry);
       let data = await result.jsonValue();
+      console.log(data);
       telemetry.data.push(data);
       await result.dispose();
-      spinner = spinner.succeed(`Visited ${url}`);
+      spinner = spinner.succeed(dim(`Visited ${url}`));
     }
 
     await browser.close();
 
-    await to(env.commit());
-    await to(env.checkoutBranch(this.workingBranch));
-    await to(env.deleteScratchBranch());
+    await env.commit();
+    await env.checkoutBranch(this.workingBranch);
+    await env.deleteScratchBranch();
 
     return telemetry;
   }
@@ -145,8 +141,12 @@ export class DataMode extends BaseMode<DynamicPlugin> {
   }
 }
 
-export class ModifyMode extends DataMode {
+export class ModifyModeImpl extends ExtractModeImpl {
   modify(telemetry: Telemetry): void {
     this.plugin.modify(telemetry);
   }
+}
+
+function dim(str: string) {
+  return chalk.dim(str);
 }

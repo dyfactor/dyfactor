@@ -16,14 +16,14 @@ function levelDescription() {
 }
 
 function verifyPluginLevel(plugin, level) {
-  let currentPlugin = plugins.find(p => p.name === plugin);
+  let currentPlugin = Object.keys(plugins).find(p => plugins[p].name === plugin);
 
   if (!currentPlugin) {
     console.log(`Plugin "${plugin}" was not found`);
     process.exit(1);
   }
 
-  if (!currentPlugin.modes.includes(level)) {
+  if (!plugins[plugin].levels.includes(level)) {
     console.log(
       `Plugin "${plugin}" only takes ${currentPlugin.modes.join(', ')}. "${level}" was passed.`
     );
@@ -34,7 +34,7 @@ function verifyPluginLevel(plugin, level) {
 }
 
 program
-  .option('-l, --level <level>', `analyze, export-data, modify`)
+  .option('-l, --level <level>', `extract, modify`)
   .action(async (type, plugin, path, options) => {
     let level;
     if (options.level) {
@@ -42,7 +42,10 @@ program
     }
 
     let runner = new Runner(env);
-
-    await runner.run(type, plugin, path, level);
+    try {
+      await runner.run(type, plugin, path, level);
+    } catch (e) {
+      throw e;
+    }
   })
   .parse(process.argv);

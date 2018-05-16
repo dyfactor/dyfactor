@@ -1,0 +1,5 @@
+import { AbstractStaticPlugin } from 'dyfactor';
+
+export default class extends AbstractStaticPlugin {
+  modify() {}
+}

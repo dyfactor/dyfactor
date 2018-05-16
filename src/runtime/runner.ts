@@ -1,5 +1,5 @@
 import { Environment } from './environment';
-import { modeFactory } from './mode';
+import { DynamicMode, StaticMode, modeFactory } from './mode';
 
 export class Runner {
   constructor(private env: Environment) {}
@@ -9,14 +9,31 @@ export class Runner {
     let Plugin = env.lookupPlugin(type, name);
     let { capabilities } = Plugin;
     let plugin = new Plugin(path, env);
-    let mode = modeFactory(level, env, plugin)!;
+    let mode = modeFactory(capabilities, level, env, plugin);
+    if (isDynamic(mode)) {
+      try {
+        await mode.instrument();
+      } catch (e) {
+        console.log('\n');
+        console.log(e.message);
+        process.exit(1);
+      }
 
-    if (capabilities.runtime) {
-      await mode.instrument();
-      let telemetry = await mode.run();
-      mode.modify(telemetry);
+      let telemetry;
+
+      try {
+        telemetry = await mode.run();
+        mode.modify(telemetry);
+      } catch (e) {
+        console.log(e);
+        process.exit(1);
+      }
     } else {
-      mode.analyze();
+      mode.modify();
     }
   }
+}
+
+function isDynamic(mode: StaticMode | DynamicMode): mode is DynamicMode {
+  return !!(<DynamicMode>mode).run && !!(<DynamicMode>mode).instrument;
 }
