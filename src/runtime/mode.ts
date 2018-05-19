@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import * as fs from 'fs';
 import { prompt } from 'inquirer';
-import * as ora from 'ora';
 import { launch } from 'puppeteer';
 import {
   AbstractDynamicPlugin,
@@ -69,28 +68,25 @@ export interface DynamicMode {
 export class StaticModeImpl implements StaticMode {
   constructor(protected env: Environment, protected plugin: AbstractStaticPlugin) {}
   modify(): void {
-    let spinner = ora('Applying CodeMod ...').start();
     this.plugin.modify();
-    spinner.succeed('Applied CodeMod');
+    success('applied codemod');
   }
 }
 
 export class ExtractModeImpl implements DynamicMode {
   constructor(protected env: Environment, protected plugin: AbstractDynamicPlugin) {}
   private workingBranch: string = '';
-  private spinner: any;
   async instrument(): Promise<void> {
     await prompt([
       {
         type: 'continue',
         name: 'server',
-        message: 'Start your dev server and press enter to continue ...',
+        message: 'Start your dev server and press enter to continue...',
         default: 'Continue'
       }
     ]);
 
     let { env } = this;
-    let spinner = (this.spinner = ora('Applying instrumentation ...').start());
 
     let branch = await env.currentBranch();
 
@@ -98,33 +94,30 @@ export class ExtractModeImpl implements DynamicMode {
 
     await env.scratchBranch('refactor');
 
+    printStep(1, 3, '⚙️  Intrumenting application...');
     this.plugin.instrument();
-
-    this.spinner = spinner.succeed(dim('Applied instrumentation'));
   }
 
   async run(): Promise<Telemetry> {
-    let { spinner, env } = this;
+    let { env } = this;
 
+    printStep(2, 3, '🛰️  Collecting telemetry data...');
     let browser = await launch({ headless: false, slowMo: 250 });
     let page = await browser.newPage();
 
     let telemetry: Telemetry = { data: [] };
 
     let navigationOptions = env.navigation!.options ? env.navigation!.options : {};
-
     for (let currentPage of env.navigation!.pages) {
       let { url, waitFor } = currentPage;
-      spinner.start(`Visiting ${url} ...`);
+      console.log(dim(`Visiting ${url}...`));
 
       await page.goto(url, navigationOptions);
       await page.waitFor(waitFor || 2000);
       let result = await page.evaluateHandle(() => (window as any).__dyfactor_telemetry);
       let data = await result.jsonValue();
-      console.log(data);
       telemetry.data.push(data);
       await result.dispose();
-      spinner = spinner.succeed(dim(`Visited ${url}`));
     }
 
     await browser.close();
@@ -137,16 +130,28 @@ export class ExtractModeImpl implements DynamicMode {
   }
 
   modify(telemetry: Telemetry): void {
+    printStep(3, 3, '✍️ Writing telementry data to `./dyfactor-telemetry.json...`');
     fs.writeFileSync('dyfactor-telemetry.json', JSON.stringify(telemetry));
+    success('collected telementry');
   }
 }
 
 export class ModifyModeImpl extends ExtractModeImpl {
   modify(telemetry: Telemetry): void {
+    printStep(3, 3, '😎 Modifiying application with telemetry data...');
     this.plugin.modify(telemetry);
+    success('updated application');
   }
 }
 
 function dim(str: string) {
   return chalk.dim(str);
+}
+
+function printStep(step: number, total: number, message: string) {
+  console.log(`${dim(`[${step}/${total}]`)} ${message}`);
+}
+
+function success(message: string) {
+  console.log(`${chalk.green(`Success:`)} ${message}`);
 }

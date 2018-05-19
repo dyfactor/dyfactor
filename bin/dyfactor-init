@@ -2,7 +2,6 @@
 'use strict';
 
 const fs = require('fs');
-const spinner = require('ora')('Initializing dyfactor').start();
 const dyfactorPath = `${process.cwd()}/.dyfactor.json`;
 
 if (!fs.existsSync(dyfactorPath)) {
@@ -20,4 +19,4 @@ if (!fs.existsSync(dyfactorPath)) {
   );
 }
 
-spinner.succeed('Initialized dyfactor');
+console.log(`${chalk.green('Success:')} initialized dyfactor`);

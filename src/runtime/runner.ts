@@ -15,7 +15,7 @@ export class Runner {
         await mode.instrument();
       } catch (e) {
         console.log('\n');
-        console.log(e.message);
+        console.log(e);
         process.exit(1);
       }
 

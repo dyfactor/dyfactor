@@ -4,7 +4,7 @@
 const fs = require('fs');
 const program = require('commander');
 const find = require('find-up');
-const chalk = require('Chalk');
+const chalk = require('chalk');
 
 program
   .action((pluginType, sourceType, name) => {
@@ -40,5 +40,5 @@ function createProject(pluginType, type, name) {
   pkg.dyfactor.name = name;
   fs.writeFileSync(`./${dir}/index.js`, index);
   fs.writeFileSync(`./${dir}/package.json`, JSON.stringify(pkg, null, 2));
-  console.log(`${chalk.green('Success:')} Created the "${name}" plugin at "./${dir}"`);
+  console.log(`${chalk.green('Success:')} created the "${name}" plugin at "./${dir}"`);
 }
