@@ -1,6 +1,6 @@
 {
   "name": "dyfactor",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A brand new TypeScript library.",
   "main": "dist/commonjs/src/index.js",
   "module": "dist/modules/src/index.js",
