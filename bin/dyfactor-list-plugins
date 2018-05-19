@@ -2,6 +2,7 @@
 'use strict';
 
 const { Environment } = require('../dist/commonjs/src');
+const chalk = require('chalk');
 
 let { plugins } = Environment.create();
 let message = Object.keys(plugins)
@@ -9,7 +10,9 @@ let message = Object.keys(plugins)
     let config = plugins[pluginName];
     let levels = config.levels;
     let type = config.type;
-    return `Name: ${pluginName} Type: ${type} Levels: ${levels.join(', ')}`;
+    return `${chalk.dim('Name:')} ${pluginName} ${chalk.dim('Type:')} ${type} ${chalk.dim(
+      'Levels:'
+    )} ${levels.join(', ')}`;
   })
   .join('\n');
 
