@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const dyfactorPath = `${process.cwd()}/.dyfactor.json`;
+const chalk = require('chalk');
 
 if (!fs.existsSync(dyfactorPath)) {
   fs.writeFileSync(
