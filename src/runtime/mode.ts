@@ -94,7 +94,7 @@ export class ExtractModeImpl implements DynamicMode {
 
     await env.scratchBranch('refactor');
 
-    printStep(1, 3, '⚙️  Intrumenting application...');
+    printStep(1, 3, '⚙️  Instrumenting application...');
     this.plugin.instrument();
   }
 
@@ -138,7 +138,7 @@ export class ExtractModeImpl implements DynamicMode {
 
 export class ModifyModeImpl extends ExtractModeImpl {
   modify(telemetry: Telemetry): void {
-    printStep(3, 3, '😎 Modifiying application with telemetry data...');
+    printStep(3, 3, '😎 Modifying application with telemetry data...');
     this.plugin.modify(telemetry);
     success('updated application');
   }
