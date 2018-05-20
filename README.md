@@ -7,7 +7,7 @@ Dyfactor is platform for writing and executing profile-guided codemods. By combi
 **See Dyfactor In Action**
 
 <div style="text-align:center">
-  <a style="text-align:center" href="https://www.youtube.com/watch?v=_aepVXHceKw"><img alt="Dyfactor Video" src="https://img.youtube.com/vi/_aepVXHceKw/0.jpg" /></a>
+  <a style="text-align:center" href="https://youtu.be/D0d3rMp-T9I"><img alt="Dyfactor Video" src="https://img.youtube.com/vi/D0d3rMp-T9I/0.jpg" /></a>
 </div>
 
 # Install
