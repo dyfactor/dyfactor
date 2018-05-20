@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/dyfactor/dyfactor.svg?branch=master)](https://travis-ci.org/dyfactor/dyfactor)
 
-Dyfactor is platform for profile-guided codemodes. By combining runtime information and static analysis, applications are able migrate codebases to new APIs at a much quicker pace.
+Dyfactor is platform for writing and executing profile-guided codemods. By combining runtime information and static analysis, applications are able migrate codebases to new APIs at a much quicker pace.
 
 **See Dyfactor In Action**
 
