@@ -37,11 +37,11 @@ $ yarn dyfactor --help
 
 # Why Dyfactor?
 
-Tools like JSCodeShift and Babel are excellent tools for migrating code from one API to another due to the fact they rely on static analysis. However, it is completely possible for parts of an application to be relying on runtime information to determine execution. In other cases you may have custom DSLs like template laguages that don't have the same static analysis gurantees as JavaScript does. Migrating this type of code typically requires a great deal of developer intervention to sort out what is actually happen. Dyfactor's goal is to shorten this cravase of understanding.
+Tools like JSCodeShift and Babel are excellent tools for migrating code from one API to another due to the fact they rely on static analysis. However, it is completely possible for parts of an application to be relying on runtime information to determine execution. In other cases you may have custom DSLs like template languages that don't have the same static analysis guarantees as JavaScript does. Migrating this type of code typically requires a great deal of developer intervention to sort out what is actually happening. Dyfactor's goal is to shorten this crevasse of understanding.
 
 ## A Quick Example
 
-In Ember's template layer deverlopers can invoke components with arguments. They also can look at local values on the backing class. A template for a component may look like the following.
+In Ember's template layer developers can invoke components with arguments. They also can look at local values on the backing class. A template for a component may look like the following.
 
 ```hbs
 <h1>{{firstName}} {{lastName}}</h1>
@@ -52,23 +52,23 @@ In Ember's template layer deverlopers can invoke components with arguments. They
 </ul>
 ```
 
-While this template is declaritive its not obvious if any of the `MustacheExpressions` (curlys) where arguments to the component or if they are local values on the component class. The only way to know is to go look at the invocation of the component. In doing so we find that `firstName` and `lastName` are passed in as arguments.
+While this template is declarative, it's not obvious if any of the `MustacheExpressions` (curlies) were arguments to the component or if they are local values on the component class. The only way to know is to go look at the invocation of the component. In doing so, we find that `firstName` and `lastName` are passed in as arguments.
 
 ```hbs
 {{post-info firstName=fName lastName=lName}}
 ```
 
-The Ember Core has recognized that is extremely problematic as an application grows, so they have allowed arguments to be pre-fixed with `@` and locals to be prefixed with `this.`. The issue is that migrated all the templates in a project would take too long because it requires developers to go seperate these things out.
+The Ember Core has recognized this is extremely problematic as an application grows, so they have allowed arguments to be pre-fixed with `@` and locals to be prefixed with `this.`. The issue is that migrating all the templates in a project would take too long because it requires developers to go separate these things out.
 
-This is where Dyfactor comes in. By writing a [Dynamic Plugin](#dynamic-plugins) we can instrument the application in such a way that allows us to know how this symbols are being resolved at runtime. From there we can use that information to go manually migrate the code or let Dyfactor attempt to do the migration for us.
+This is where Dyfactor comes in. By writing a [Dynamic Plugin](#dynamic-plugins), we can instrument the application in such a way that allows us to know how these symbols are being resolved at runtime. From there, we can use that information to go manually migrate the code or let Dyfactor attempt to do the migration for us.
 
 # How Does It Work?
 
-At a high level Dyfactor is a runner and plugin system. It currently supports two types of plugins: Static Plugins and Dynamic Plugins.
+At a high level, Dyfactor is a runner and plugin system. It currently supports two types of plugins: Static Plugins and Dynamic Plugins.
 
 ## Static Plugins
 
-A Static Plugin is meant to be used to perform codemods that only require static analysis and is only single phased. These should be thought as light wrapper around a codemod you would write with jscodeshift or Babel.
+A Static Plugin is meant to be used to perform codemods that only require static analysis and is only single phased. These should be thought of as a light wrapper around a codemod you would write with jscodeshift or Babel.
 
 ### Plugin Interface
 
@@ -126,7 +126,7 @@ export default class extends StaticPlugin {
 
 ## Dynamic Plugins
 
-A Dynamic Plugin is two-phased.the first phase allows you to safely instrument an application to collect that runtime telemetry data. The instrumented application is then booted with Puppeteer to collect the data. The second phase is responsible for introspecting the runtime telemetry data and applying codemods based on that data. It's important to note that Dynamic Plugins can be run as single phased plugins just to produce the runtime telemetry and write it to disk.
+A Dynamic Plugin is two-phased. The first phase allows you to safely instrument an application to collect that runtime telemetry data. The instrumented application is then booted with Puppeteer to collect the data. The second phase is responsible for introspecting the runtime telemetry data and applying codemods based on that data. It's important to note that Dynamic Plugins can be run as single phased plugins just to produce the runtime telemetry and write it to disk.
 
 ### Plugin Interface
 
