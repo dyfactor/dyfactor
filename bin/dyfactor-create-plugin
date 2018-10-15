@@ -12,7 +12,7 @@ program
       throw new Error(`<pluginType> can only be "static" or "dynamic" got "${pluginType}".`);
     }
 
-    if (!type) {
+    if (!sourceType) {
       throw new Error('Must pass a type as the first argument');
     }
 
