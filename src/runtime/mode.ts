@@ -2,14 +2,7 @@ import chalk from 'chalk';
 import * as fs from 'fs';
 import { prompt } from 'inquirer';
 import { launch } from 'puppeteer';
-import {
-  AbstractDynamicPlugin,
-  AbstractStaticPlugin,
-  Capabilities,
-  DynamicPlugin,
-  PluginType,
-  StaticPlugin
-} from '../plugins/plugin';
+import { AbstractDynamicPlugin, AbstractStaticPlugin, Capabilities, DynamicPlugin, PluginType, StaticPlugin } from '../plugins/plugin';
 import { Telemetry } from '../plugins/telemetry';
 import error from '../util/error';
 import { Environment } from './environment';
@@ -96,13 +89,22 @@ export class ExtractModeImpl implements DynamicMode {
 
     printStep(1, 3, '⚙️  Instrumenting application...');
     this.plugin.instrument();
+
+    await prompt([
+      {
+        type: 'continue',
+        name: 'server',
+        message: 'Press enter when your dev server is reset...',
+        default: 'Continue'
+      }
+    ]);
   }
 
   async run(): Promise<Telemetry> {
     let { env } = this;
 
     printStep(2, 3, '🛰️  Collecting telemetry data...');
-    let browser = await launch({ headless: false, slowMo: 250 });
+    let browser = await launch({ headless: false, ignoreHTTPSErrors: true,  slowMo: 250 });
     let page = await browser.newPage();
 
     let telemetry: Telemetry = { data: [] };
