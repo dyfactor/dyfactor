@@ -85,7 +85,7 @@ export class Environment {
 
   async commit() {
     await this.git('add .');
-    return this.git(`commit -m "done"`);
+    return this.git(`commit --no-verify -m "done"`);
   }
 
   async deleteScratchBranch() {
