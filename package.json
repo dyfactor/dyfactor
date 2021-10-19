@@ -8,6 +8,10 @@
   "ember-addon": {
     "main": "ember-addon.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dyfactor/dyfactor.git"
+  },
   "bin": "./bin/dyfactor",
   "scripts": {
     "start": "ember serve",
